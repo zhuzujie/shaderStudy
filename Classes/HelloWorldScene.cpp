@@ -66,11 +66,18 @@ bool HelloWorld::init()
     // add "HelloWorld" splash screen"
     auto sprite = Sprite::create("HelloWorld.png");
 
+
     // position the sprite on the center of the screen
     sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
-
     // add the sprite as a child to this layer
     this->addChild(sprite, 0);
+    
+    auto *pShader = GLProgramState::create(GLProgram::createWithFilenames("Lesson3.vert", "Lesson3.frag"));
+
+    pShader->applyUniforms();
+
+
+    sprite->setGLProgramState(pShader);
     
     return true;
 }
