@@ -15,6 +15,11 @@ public:
     
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
+    void updateTexUVAi(float dt);
+private:
+    cocos2d::GLProgramState* m_pState;
+    cocos2d::Vec2 m_uTexUV;
+    cocos2d::Sprite * m_pSprite;
 };
 
 #endif // __HELLOWORLD_SCENE_H__

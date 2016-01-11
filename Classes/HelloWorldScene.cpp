@@ -64,24 +64,45 @@ bool HelloWorld::init()
     this->addChild(label, 1);
 
     // add "HelloWorld" splash screen"
-    auto sprite = Sprite::create("HelloWorld.png");
+    m_pSprite = Sprite::create("HelloWorld.png");
 
 
     // position the sprite on the center of the screen
-    sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+    m_pSprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
     // add the sprite as a child to this layer
-    this->addChild(sprite, 0);
+//    sprite->setColor(Color3B(0, 0, 255));
+    this->addChild(m_pSprite, 0);
     
-    auto *pShader = GLProgramState::create(GLProgram::createWithFilenames("Lesson3.vert", "Lesson3.frag"));
-
-    pShader->applyUniforms();
-
-
-    sprite->setGLProgramState(pShader);
+    Texture2D::TexParams texParam;
+    texParam.magFilter = GL_NEAREST;
+    texParam.minFilter = GL_NEAREST;
+    texParam.wrapS = GL_REPEAT;
+    texParam.wrapT = GL_REPEAT;
     
+    Texture2D *pNewTexture = Director::getInstance()->getTextureCache()->addImage("CloseNormal.png");
+//    pNewTexture->setTexParameters(texParam);
+    
+    m_pSprite->getTexture()->setTexParameters(texParam);
+    
+    m_pState = GLProgramState::create(GLProgram::createWithFilenames("Lesson6.vert", "Lesson6.frag"));
+
+    m_pState->applyUniforms();
+    m_pState->setUniformVec4("u_color", Vec4(1, 1, 1, 1));
+    m_pState->setUniformTexture("u_texture", pNewTexture);
+
+    m_pSprite->setGLProgramState(m_pState);
+    schedule(schedule_selector(HelloWorld::updateTexUVAi));
+    
+    m_uTexUV.x = m_uTexUV.y = 0;
     return true;
 }
 
+
+void HelloWorld::updateTexUVAi(float dt)
+{
+    m_uTexUV.x += dt;
+    m_pState->setUniformVec2("u_texUV", m_uTexUV);
+}
 
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
