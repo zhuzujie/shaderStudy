@@ -70,38 +70,41 @@ bool HelloWorld::init()
     // position the sprite on the center of the screen
     m_pSprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
     // add the sprite as a child to this layer
-//    sprite->setColor(Color3B(0, 0, 255));
+
     this->addChild(m_pSprite, 0);
-    
-    Texture2D::TexParams texParam;
-    texParam.magFilter = GL_NEAREST;
-    texParam.minFilter = GL_NEAREST;
-    texParam.wrapS = GL_REPEAT;
-    texParam.wrapT = GL_REPEAT;
-    
-    Texture2D *pNewTexture = Director::getInstance()->getTextureCache()->addImage("CloseNormal.png");
-//    pNewTexture->setTexParameters(texParam);
-    
-    m_pSprite->getTexture()->setTexParameters(texParam);
-    
-    m_pState = GLProgramState::create(GLProgram::createWithFilenames("Lesson6.vert", "Lesson6.frag"));
 
+    
+    m_pState = GLProgramState::create(GLProgram::createWithFilenames("Lesson13.vert", "Lesson13.frag"));
+    
+    Size imgSize = m_pSprite->getContentSize();
     m_pState->applyUniforms();
-    m_pState->setUniformVec4("u_color", Vec4(1, 1, 1, 1));
-    m_pState->setUniformTexture("u_texture", pNewTexture);
-
     m_pSprite->setGLProgramState(m_pState);
-    schedule(schedule_selector(HelloWorld::updateTexUVAi));
+    m_dt = 0;
     
-    m_uTexUV.x = m_uTexUV.y = 0;
+    for (int i = 0; i < 2; ++i) {
+        m_lightRange[i] = 50;
+    }
+    
+    m_lightPos[0] = Vec2(imgSize.width*0.25,imgSize.height*0.5);
+    m_lightPos[1] = Vec2(imgSize.width*0.65,imgSize.height*0.5);
+    m_lightColor[0] = Vec4(1.0, 0.0, 0.0, 1.0);
+    m_lightColor[1] = Vec4(0.0, 1.0, 1.0, 1.0);
+    
+    m_pState->setUniformFloatv("u_lightRange", 2, m_lightRange);
+    m_pState->setUniformVec4v("u_lightColor", 2, m_lightColor);
+    
+    schedule(schedule_selector(HelloWorld::updateMSK));
+
     return true;
 }
 
-
-void HelloWorld::updateTexUVAi(float dt)
+void HelloWorld::updateMSK(float dt)
 {
-    m_uTexUV.x += dt;
-    m_pState->setUniformVec2("u_texUV", m_uTexUV);
+    Size imgSize = m_pSprite->getContentSize();
+    m_dt += dt;
+    m_lightPos[0] = Vec2(imgSize.width*0.65,imgSize.height*0.5) + Vec2(sinf(m_dt)*imgSize.height*0.25,cosf(m_dt)*imgSize.height*0.25);
+    m_lightPos[1] = Vec2(imgSize.width*0.85,imgSize.height*0.5) + Vec2(sinf(m_dt)*imgSize.height*0.25,cosf(m_dt)*imgSize.height*0.25);
+    m_pState->setUniformVec2v("u_lightPos", 2, m_lightPos);
 }
 
 void HelloWorld::menuCloseCallback(Ref* pSender)

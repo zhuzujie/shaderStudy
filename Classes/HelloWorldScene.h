@@ -15,11 +15,19 @@ public:
     
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
-    void updateTexUVAi(float dt);
+    void updateMSK(float dt);
 private:
     cocos2d::GLProgramState* m_pState;
-    cocos2d::Vec2 m_uTexUV;
+
     cocos2d::Sprite * m_pSprite;
+    
+    //点光的位置
+    cocos2d::Vec2 m_lightPos[2];
+    //点光的强度
+    float m_lightRange[2];
+    //点光的色彩
+    cocos2d::Vec4 m_lightColor[2];
+    float m_dt;
 };
 
 #endif // __HELLOWORLD_SCENE_H__

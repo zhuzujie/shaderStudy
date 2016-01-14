@@ -2,14 +2,14 @@ attribute vec4 a_position;
 attribute vec2 a_texCoord;
 
 #ifdef GL_ES
-    varying mediump vec2 v_texCoord1;
+    varying mediump vec2 v_texCoord;
 #else
-    varying vec2 v_texCoord1;
+    varying vec2 v_texCoord;
 #endif
 
 
 void main()
 {
     gl_Position = CC_PMatrix * a_position;
-    v_texCoord1 = a_texCoord;
+    v_texCoord = a_texCoord;
 }
