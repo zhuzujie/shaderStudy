@@ -62,49 +62,67 @@ bool HelloWorld::init()
 
     // add the label as a child to this layer
     this->addChild(label, 1);
+    
+    auto s = Director::getInstance()->getWinSize();
+    
+    Camera *_camera = Camera::createPerspective(60, (GLfloat)s.width/s.height, 1, 1000);
+    _camera->setPosition3D(Vec3(0,100,400));
+    _camera->lookAt(Vec3(0, 0, 0));
+    _camera->setCameraFlag(CameraFlag::USER1);
+    this->addChild(_camera);
+    
 
     // add "HelloWorld" splash screen"
-    m_pSprite = Sprite::create("HelloWorld.png");
-
-
-    // position the sprite on the center of the screen
-    m_pSprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
-    // add the sprite as a child to this layer
-
-    this->addChild(m_pSprite, 0);
+    m_pSprite = Sprite3D::create("qiu.c3b");
+    m_pSprite->setPosition3D(Vec3(0, 0, 0));
+    m_pSprite->setRotation3D(Vec3(0, 0, 0));
+//    m_pSprite->setScale(0.5);
+    m_pSprite->setCameraMask(2);
+//    m_pSprite->setLightMask(0);
+//    this->addChild(m_pSprite);
+    
+//    Texture2D *newTexture = Director::getInstance()->getTextureCache()->addImage("HelloWorld.png");
+    
+    m_pState = GLProgramState::create(GLProgram::createWithFilenames("3DLesson13.vert", "3DLesson13.frag"));
 
     
-    m_pState = GLProgramState::create(GLProgram::createWithFilenames("Lesson13.vert", "Lesson13.frag"));
-    
-    Size imgSize = m_pSprite->getContentSize();
+    m_pState->setUniformVec4("u_fogColor", Vec4(0.5, 0.0, 0.0, 1.0));
+    m_pState->setUniformFloat("u_fogStar",100.0);
+    m_pState->setUniformFloat("u_fogEnd", 500.0);
+    m_pState->setUniformInt("u_fogEquation", 0);
     m_pState->applyUniforms();
-    m_pSprite->setGLProgramState(m_pState);
+
+//    m_pSprite->setGLProgramState(m_pState);
     m_dt = 0;
     
-    for (int i = 0; i < 2; ++i) {
-        m_lightRange[i] = 50;
-    }
-    
-    m_lightPos[0] = Vec2(imgSize.width*0.25,imgSize.height*0.5);
-    m_lightPos[1] = Vec2(imgSize.width*0.65,imgSize.height*0.5);
-    m_lightColor[0] = Vec4(1.0, 0.0, 0.0, 1.0);
-    m_lightColor[1] = Vec4(0.0, 1.0, 1.0, 1.0);
-    
-    m_pState->setUniformFloatv("u_lightRange", 2, m_lightRange);
-    m_pState->setUniformVec4v("u_lightColor", 2, m_lightColor);
-    
-    schedule(schedule_selector(HelloWorld::updateMSK));
-
+    this->createTree();
+//    schedule(schedule_selector(HelloWorld::updateMSK));
     return true;
+}
+
+
+void HelloWorld::createTree()
+{
+    for (int i = 0; i < 60; i++) {
+        auto spriteTree = Sprite3D::create("tree.c3t");
+        spriteTree->setPosition3D(10*Vec3(rand_0_1()*100-50, 0, rand_0_1()*120-100));
+        spriteTree->setRotation3D(Vec3(-90, 0, 0));
+        spriteTree->setScale(rand_0_1()*0.05+0.05);
+        spriteTree->setCameraMask(2);
+        this->addChild(spriteTree);
+        
+        //树干
+        m_pState->setUniformFloat("u_fogDensity",5);
+        spriteTree->setGLProgramState(m_pState);
+    }
 }
 
 void HelloWorld::updateMSK(float dt)
 {
-    Size imgSize = m_pSprite->getContentSize();
-    m_dt += dt;
-    m_lightPos[0] = Vec2(imgSize.width*0.65,imgSize.height*0.5) + Vec2(sinf(m_dt)*imgSize.height*0.25,cosf(m_dt)*imgSize.height*0.25);
-    m_lightPos[1] = Vec2(imgSize.width*0.85,imgSize.height*0.5) + Vec2(sinf(m_dt)*imgSize.height*0.25,cosf(m_dt)*imgSize.height*0.25);
-    m_pState->setUniformVec2v("u_lightPos", 2, m_lightPos);
+    m_dt += dt*10;
+    m_pSprite->setRotation3D(Vec3(0, m_dt, 0));
+    Mat4 tmp4 = m_pSprite->getNodeToWorldTransform();
+    m_pState->setUniformMat4("u_mworldPos", tmp4);
 }
 
 void HelloWorld::menuCloseCallback(Ref* pSender)

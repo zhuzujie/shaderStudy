@@ -16,17 +16,19 @@ public:
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
     void updateMSK(float dt);
+    void createTree();
 private:
     cocos2d::GLProgramState* m_pState;
 
-    cocos2d::Sprite * m_pSprite;
+    cocos2d::Sprite3D * m_pSprite;
     
     //点光的位置
-    cocos2d::Vec2 m_lightPos[2];
+    cocos2d::Vec3 posLightPos[3];
     //点光的强度
-    float m_lightRange[2];
+    float posLightRange[3];
     //点光的色彩
-    cocos2d::Vec4 m_lightColor[2];
+    cocos2d::Vec3 posLightColor[3];
+    
     float m_dt;
 };
 
