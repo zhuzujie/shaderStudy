@@ -65,41 +65,83 @@ bool HelloWorld::init()
     
     auto s = Director::getInstance()->getWinSize();
     
-    Camera *_camera = Camera::createPerspective(60, (GLfloat)s.width/s.height, 1, 1000);
-    _camera->setPosition3D(Vec3(0,100,400));
+    _camera = Camera::createPerspective(60, (GLfloat)s.width/s.height, 1, 1000);
+    _camera->setPosition3D(Vec3(0,0,50));
     _camera->lookAt(Vec3(0, 0, 0));
     _camera->setCameraFlag(CameraFlag::USER1);
     this->addChild(_camera);
     
-
+    //创建天空盒
+    auto textureCube = TextureCube::create("res/left.png", "res/right.png", "res/top.png", "res/bottom.png", "res/front.png", "res/back.png");
+    //设置纹理参数
+    Texture2D::TexParams tRepeatParams;
+    tRepeatParams.magFilter = GL_LINEAR;
+    tRepeatParams.minFilter = GL_LINEAR;
+    tRepeatParams.wrapS = GL_CLAMP_TO_EDGE;
+    tRepeatParams.wrapT = GL_CLAMP_TO_EDGE;
+    
+    textureCube->setTexParameters(tRepeatParams);
+    
+    //创建天空盒对象
+    auto skyBox = Skybox::create();
+    skyBox->setTexture(textureCube);
+    skyBox->setCameraMask(2);
+    this->addChild(skyBox);
+    
+    
     // add "HelloWorld" splash screen"
     m_pSprite = Sprite3D::create("qiu.c3b");
     m_pSprite->setPosition3D(Vec3(0, 0, 0));
     m_pSprite->setRotation3D(Vec3(0, 0, 0));
-//    m_pSprite->setScale(0.5);
+    m_pSprite->setScale(0.5);
     m_pSprite->setCameraMask(2);
-//    m_pSprite->setLightMask(0);
-//    this->addChild(m_pSprite);
-    
-//    Texture2D *newTexture = Director::getInstance()->getTextureCache()->addImage("HelloWorld.png");
-    
-    m_pState = GLProgramState::create(GLProgram::createWithFilenames("3DLesson13.vert", "3DLesson13.frag"));
+    m_pSprite->setLightMask(0);
+    this->addChild(m_pSprite);
+
+
+    m_pState = GLProgramState::create(GLProgram::createWithFilenames("3DLesson14.vert", "3DLesson14.frag"));
 
     
-    m_pState->setUniformVec4("u_fogColor", Vec4(0.5, 0.0, 0.0, 1.0));
-    m_pState->setUniformFloat("u_fogStar",100.0);
-    m_pState->setUniformFloat("u_fogEnd", 500.0);
-    m_pState->setUniformInt("u_fogEquation", 0);
+    m_pState->setUniformTexture("u_cubeTex", textureCube);
     m_pState->applyUniforms();
 
-//    m_pSprite->setGLProgramState(m_pState);
+    m_pSprite->setGLProgramState(m_pState);
     m_dt = 0;
     
-    this->createTree();
+    //监听事件
+    auto listener = EventListenerTouchAllAtOnce::create();
+    listener->onTouchesBegan = CC_CALLBACK_2(HelloWorld::onTouchesBegan, this);
+    listener->onTouchesMoved = CC_CALLBACK_2(HelloWorld::onTouchMoved, this);
+    listener->onTouchesEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+//    this->createTree();
 //    schedule(schedule_selector(HelloWorld::updateMSK));
     return true;
 }
 
+void HelloWorld::onTouchesBegan(const std::vector<Touch *> &touches, cocos2d::Event *unused_event)
+{
+
+}
+
+void HelloWorld::onTouchMoved(const std::vector<cocos2d::Touch *> &touches, cocos2d::Event *unused_event)
+{
+    if (touches.size()) {
+        auto touch = touches[0];
+        auto delta = touch->getDelta();
+        static float angle = 0;
+        angle -= CC_DEGREES_TO_RADIANS(delta.x);
+        if (_camera) {
+            _camera->setPosition3D(Vec3(50*sinf(angle), 0.0, 50*cosf(angle)));
+            _camera->lookAt(Vec3(0.0, 0.0, 0.0),Vec3(0.0, 1.0, 0.0));
+        }
+    }
+}
+
+void HelloWorld::onTouchEnded(const std::vector<cocos2d::Touch *> &touches, cocos2d::Event *unused_event)
+{
+
+}
 
 void HelloWorld::createTree()
 {
@@ -119,10 +161,11 @@ void HelloWorld::createTree()
 
 void HelloWorld::updateMSK(float dt)
 {
-    m_dt += dt*10;
-    m_pSprite->setRotation3D(Vec3(0, m_dt, 0));
-    Mat4 tmp4 = m_pSprite->getNodeToWorldTransform();
-    m_pState->setUniformMat4("u_mworldPos", tmp4);
+    m_dt -= CC_DEGREES_TO_RADIANS(dt*10);
+    if (_camera) {
+        _camera->setPosition3D(Vec3(50*sinf(m_dt), 0.0, 50*cosf(m_dt)));
+        _camera->lookAt(Vec3(0.0, 0.0, 0.0),Vec3(0.0, 1.0, 0.0));
+    }
 }
 
 void HelloWorld::menuCloseCallback(Ref* pSender)

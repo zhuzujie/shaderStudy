@@ -17,6 +17,12 @@ public:
     CREATE_FUNC(HelloWorld);
     void updateMSK(float dt);
     void createTree();
+    
+    void onTouchesBegan(const std::vector<cocos2d::Touch *> &touches, cocos2d::Event *unused_event);
+    void onTouchMoved(const std::vector<cocos2d::Touch *> &touches, cocos2d::Event *unused_event);
+    void onTouchEnded(const std::vector<cocos2d::Touch *> &touches, cocos2d::Event *unused_event);
+    
+    
 private:
     cocos2d::GLProgramState* m_pState;
 
@@ -28,6 +34,8 @@ private:
     float posLightRange[3];
     //点光的色彩
     cocos2d::Vec3 posLightColor[3];
+    
+    cocos2d::Camera *_camera;
     
     float m_dt;
 };
